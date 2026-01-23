@@ -4,12 +4,13 @@ export type DayMeta = {
     timestamp: number
 }
 
-export type DayRange = "3d" | "5d" | "7d" | "28d";
+export type DayRange = "3d" | "5d" | "7d" | "14d" | "28d";
 
 const RANGE_MAP: Record<DayRange, number> = {
     "3d": 3,
     "5d": 5,
     "7d": 7,
+    "14d": 14,
     "28d": 28,
 }
 

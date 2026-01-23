@@ -3,7 +3,7 @@
 import { authClient } from "@/lib/auth-client";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu";
-import { BookmarkIcon, CreditCardIcon, EqualIcon, Grid2X2Icon, HomeIcon, ImageIcon, LogOut, SettingsIcon, StarIcon, TrafficConeIcon, UserRoundIcon } from "lucide-react";
+import { BookmarkIcon, CreditCardIcon, EqualIcon, Grid2X2Icon, HomeIcon, ImageIcon, LogOut, MoonIcon, SettingsIcon, StarIcon, SunIcon, TrafficConeIcon, UserRoundIcon } from "lucide-react";
 import { SiGithub, SiInstagram } from "react-icons/si";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -13,9 +13,11 @@ import { usePathname } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { useEffect, useState } from "react";
 import { Kbd } from "@/components/ui/kbd";
+import { useTheme } from "next-themes";
 
 export default function Appbar() {
     const { data: session } = authClient.useSession();
+    const { theme, setTheme } = useTheme();
     const user = session?.user;
 
     const [menuOpen, setMenuOpen] = useState(false);
@@ -84,7 +86,7 @@ export default function Appbar() {
 
                 <DropdownMenu open={userOpen} onOpenChange={setUserOpen}>
                     <DropdownMenuTrigger asChild>
-                        <Avatar>
+                        <Avatar className="border-2">
                             <AvatarImage src={user?.image ? user.image : `https://api.dicebear.com/9.x/glass/svg?seed=${user?.name ? user.name : "User"}`} />
                             <AvatarFallback>
                                 {(user?.name ? user.name : user?.email)?.charAt(0)}
@@ -135,6 +137,14 @@ export default function Appbar() {
                                 </DropdownMenuItem>
                             </Link>
                         </DropdownMenuGroup>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuLabel className="text-muted-foreground text-xs">
+                            Appearance
+                        </DropdownMenuLabel>
+                        <DropdownMenuItem onClick={() => setTheme(theme === "light" ? "dark" : "light")}>
+                            {theme === "light" ? <MoonIcon /> : <SunIcon />}
+                            <span>Toggle theme</span>
+                        </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuLabel className="text-muted-foreground text-xs">
                             pixelated
