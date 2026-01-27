@@ -6,11 +6,9 @@ export async function GET(req: Request) {
     const session = await auth.api.getSession({
         headers: await headers(),
     });
-
     if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
     const { searchParams } = new URL(req.url);
-
     const query = searchParams.get("q");
     if (!query) return Response.json({ error: "Missing search query" }, { status: 400 });
 

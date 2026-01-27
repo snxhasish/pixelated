@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
 import Image from "next/image";
 import { Button } from "../ui/button";
+import { cn } from "@/lib/utils";
 
 export type Track = {
     id: string,
@@ -78,23 +79,9 @@ export default function MusicSelect({ selectedTrack, setSelectedTrack, setTab }:
                         </div>
 
                         <div className="flex items-center gap-2">
-                            <li className="w-full flex items-center gap-3 p-2 rounded-md hover:bg-muted cursor-pointer">
-                                <Image
-                                    src={selectedTrack.image}
-                                    alt={selectedTrack.name}
-                                    className="h-10 w-10 rounded"
-                                    height={100}
-                                    width={100}
-                                />
-                                <div className="flex flex-col">
-                                    <span className="text-sm font-medium">
-                                        {selectedTrack.name}
-                                    </span>
-                                    <span className="text-xs text-muted-foreground">
-                                        {selectedTrack.artists}
-                                    </span>
-                                </div>
-                            </li>
+                            <MusicPreview
+                                track={selectedTrack}
+                            />
 
                             <Button
                                 onClick={() => setSelectedTrack(null)}
@@ -147,32 +134,41 @@ export default function MusicSelect({ selectedTrack, setSelectedTrack, setTab }:
                     {tracks.length > 0 && (
                         <ul className="flex flex-col gap-2">
                             {tracks.map((track) => (
-                                <li
+                                <MusicPreview
                                     key={track.id}
-                                    className="flex items-center gap-3 p-2 rounded-md hover:bg-muted cursor-pointer"
+                                    track={track}
                                     onClick={() => setSelectedTrack(track)}
-                                >
-                                    <Image
-                                        src={track.image}
-                                        alt={track.name}
-                                        className="h-10 w-10 rounded"
-                                        height={100}
-                                        width={100}
-                                    />
-                                    <div className="flex flex-col">
-                                        <span className="text-sm font-medium">
-                                            {track.name}
-                                        </span>
-                                        <span className="text-xs text-muted-foreground">
-                                            {track.artists}
-                                        </span>
-                                    </div>
-                                </li>
+                                />
                             ))}
                         </ul>
                     )}
                 </div>
             </CardContent>
         </Card>
+    )
+}
+
+export function MusicPreview({ track, onHover = true, className, ...props }: { track: Track, onHover?: boolean, className?: string, [props: string]: any }) {
+    return (
+        <li
+            className={cn("w-full flex items-center gap-3 p-2 rounded-md cursor-pointer", className, onHover ? "hover:bg-muted" : "")}
+            {...props}
+        >
+            <Image
+                src={track.image}
+                alt={track.name}
+                className="h-10 w-10 rounded"
+                height={100}
+                width={100}
+            />
+            <div className="flex flex-col">
+                <span className="text-sm font-medium">
+                    {track.name}
+                </span>
+                <span className="text-xs text-white mix-blend-difference ">
+                    {track.artists}
+                </span>
+            </div>
+        </li>
     )
 }

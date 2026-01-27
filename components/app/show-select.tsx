@@ -88,25 +88,9 @@ export default function ShowSelect({ selectedShow, setSelectedShow, setTab }: { 
                         </div>
 
                         <div className="flex items-center gap-2">
-                            <li className="w-full flex items-center gap-3 p-2 rounded-md hover:bg-muted cursor-pointer">
-                                <Image
-                                    src={selectedShow.poster}
-                                    alt={selectedShow.title}
-                                    width={40}
-                                    height={60}
-                                    className="rounded"
-                                    sizes="40px"
-                                />
-
-                                <div className="flex flex-col">
-                                    <span className="text-sm font-medium">
-                                        {selectedShow.title}
-                                    </span>
-                                    <span className="text-xs text-muted-foreground">
-                                        {formatReleaseDate(selectedShow.releaseDate)}
-                                    </span>
-                                </div>
-                            </li>
+                            <ShowPreview
+                                show={selectedShow}
+                            />
 
                             <Button
                                 onClick={() => setSelectedShow(null)}
@@ -159,35 +143,41 @@ export default function ShowSelect({ selectedShow, setSelectedShow, setTab }: { 
                     {shows.length > 0 && (
                         <ul className="flex flex-col gap-2">
                             {shows.map((show) => (
-                                <li
+                                <ShowPreview
                                     key={show.tmdbId}
-                                    className="flex items-center gap-3 p-2 rounded-md hover:bg-muted cursor-pointer"
-                                    onClick={() => setSelectedShow(show)}
-                                >
-                                    {show.poster && (
-                                        <Image
-                                            src={show.poster}
-                                            alt={show.title}
-                                            width={40}
-                                            height={60}
-                                            className="rounded"
-                                            sizes="40px"
-                                        />
-                                    )}
-                                    <div className="flex flex-col">
-                                        <span className="text-sm font-medium">
-                                            {show.title}
-                                        </span>
-                                        <span className="text-xs text-muted-foreground">
-                                            {formatReleaseDate(show.releaseDate)}
-                                        </span>
-                                    </div>
-                                </li>
+                                    show={show}
+                                />
                             ))}
                         </ul>
                     )}
                 </div>
             </CardContent>
         </Card>
+    )
+}
+
+export function ShowPreview({ show, className, ...props }: { show: Show, className?: string, [props: string]: any }) {
+    return (
+        <li className="w-full flex items-center gap-3 p-2 rounded-md hover:bg-muted cursor-pointer" {...props}>
+            {show.poster && (
+                <Image
+                    src={show.poster}
+                    alt={show.title}
+                    width={40}
+                    height={60}
+                    className="rounded"
+                    sizes="40px"
+                />
+            )}
+
+            <div className="flex flex-col">
+                <span className="text-sm font-medium">
+                    {show.title}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                    {formatReleaseDate(show.releaseDate)}
+                </span>
+            </div>
+        </li>
     )
 }

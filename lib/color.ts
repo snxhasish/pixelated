@@ -18,3 +18,35 @@ export function getReadableTextColor(bgHex: string) {
     // contrast threshold (WCAG)
     return luminance > 0.5 ? "#0F172A" : "#FFFFFF";
 }
+
+export function isValidColor(color: string): boolean {
+    // HEX
+    if (/^#([0-9a-fA-F]{3,4}){1,2}$/.test(color)) return true;
+
+    // RGB / RGBA
+    if (/^rgba?\(\s*(\d{1,3}\s*,\s*){2}\d{1,3}(\s*,\s*(0|1|0?\.\d+))?\s*\)$/.test(color)) {
+        return color
+            .match(/\d+(\.\d+)?/g)!
+            .every((n, i) =>
+                i < 3 ? Number(n) <= 255 : Number(n) <= 1
+            );
+    }
+
+    // HSL / HSLA
+    if (/^hsla?\(\s*\d{1,3}\s*,\s*\d{1,3}%\s*,\s*\d{1,3}%(\s*,\s*(0|1|0?\.\d+))?\s*\)$/.test(color)) {
+        const nums = color.match(/\d+(\.\d+)?/g)!;
+        const [h, s, l, a] = nums.map(Number);
+
+        return (
+            h >= 0 &&
+            h <= 360 &&
+            s >= 0 &&
+            s <= 100 &&
+            l >= 0 &&
+            l <= 100 &&
+            (a === undefined || a <= 1)
+        );
+    }
+
+    return false;
+}

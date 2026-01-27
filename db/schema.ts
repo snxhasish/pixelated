@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { pgTable, text, timestamp, boolean, index } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, index, jsonb } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
     id: text("id").primaryKey(),
@@ -30,7 +30,9 @@ export const session = pgTable(
             .notNull()
             .references(() => user.id, { onDelete: "cascade" }),
     },
-    (table) => [index("session_userId_idx").on(table.userId)],
+    (table) => [
+        index("session_userId_idx").on(table.userId)
+    ],
 );
 
 export const account = pgTable(
@@ -54,7 +56,9 @@ export const account = pgTable(
             .$onUpdate(() => /* @__PURE__ */ new Date())
             .notNull(),
     },
-    (table) => [index("account_userId_idx").on(table.userId)],
+    (table) => [
+        index("account_userId_idx").on(table.userId)
+    ],
 );
 
 export const verification = pgTable(
@@ -70,7 +74,66 @@ export const verification = pgTable(
             .$onUpdate(() => /* @__PURE__ */ new Date())
             .notNull(),
     },
-    (table) => [index("verification_identifier_idx").on(table.identifier)],
+    (table) => [
+        index("verification_identifier_idx").on(table.identifier)
+    ],
+);
+
+export const post = pgTable(
+    "post",
+    {
+        id: text("id").primaryKey(),
+        userId: text("user_id")
+            .notNull()
+            .references(() => user.id, { onDelete: "cascade" }),
+        text: text("text").notNull(),
+        attachments: jsonb("attachments")
+            .$type<{
+                type: "image" | "video";
+                url: string;
+            }[]>()
+            .default([])
+            .notNull(),
+        show: jsonb("show")
+            .$type<{
+                tmdbId: number;
+                type: string; // movie | tv
+                title: string;
+                poster: string;
+                releaseDate: string;
+            } | null>()
+            .default(null),
+        music: jsonb("music")
+            .$type<{
+                id: string;
+                name: string;
+                artists: string;
+                album: string;
+                image: string;
+                preview_url: string;
+                spotify_url: string;
+            } | null>()
+            .default(null),
+        color: text("color"),
+        isArchived: boolean("is_archived").default(false).notNull(),
+        isPublished: boolean("is_published").default(false).notNull(),
+        /**
+         * post scheduling
+         * - null  => post immediately
+         * - value => publish when now() >= scheduledAt
+         */
+        scheduledAt: timestamp("scheduled_at"),
+
+        createdAt: timestamp("created_at").defaultNow().notNull(),
+        updatedAt: timestamp("updated_at")
+            .$onUpdate(() => new Date())
+            .notNull(),
+    },
+    (table) => [
+        index("post_user_created_idx").on(table.userId, table.createdAt),
+        index("post_published_created_idx").on(table.isPublished, table.createdAt),
+        index("post_scheduled_idx").on(table.isPublished, table.scheduledAt),
+    ],
 );
 
 export const userRelations = relations(user, ({ many }) => ({
@@ -88,6 +151,13 @@ export const sessionRelations = relations(session, ({ one }) => ({
 export const accountRelations = relations(account, ({ one }) => ({
     user: one(user, {
         fields: [account.userId],
+        references: [user.id],
+    }),
+}));
+
+export const postRelations = relations(post, ({ one }) => ({
+    user: one(user, {
+        fields: [post.userId],
         references: [user.id],
     }),
 }));

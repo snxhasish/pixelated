@@ -7,12 +7,20 @@ import { Textarea } from "@/components/ui/textarea";
 import { FilmIcon, ImageIcon, MusicIcon, SmileIcon, StickerIcon, XIcon } from "lucide-react";
 import Link from "next/link";
 import { CircularProgress } from "@/components/ui/circular-progress";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import PostCard from "@/components/app/post-card";
 import MusicSelect, { Track } from "@/components/app/music-select";
 import Image from "next/image";
 import ShowSelect, { formatReleaseDate, Show } from "@/components/app/show-select";
+import GifPicker, { Gif } from "@/components/app/gif-picker";
+import { PostAttachment } from "@/types/post";
+import { AttachmentsCarousel } from "@/components/app/attachment-carousel";
+import data from "@emoji-mart/data";
+import Picker from "@emoji-mart/react";
+import { createPost } from "@/lib/post";
+import { toast } from "sonner";
+import { Spinner } from "@/components/ui/spinner";
 
 const MAX_LENGTH = 250;
 
@@ -28,10 +36,13 @@ export default function CreateCard({ user }: {
     } | undefined
 }) {
     const router = useRouter();
+    const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
+    const [loading, setLoading] = useState<boolean>(false);
     const [tab, setTab] = useState<"text" | "preview" | "music" | "show" | "gif" | "emoji">("text");
     const [text, setText] = useState<string>("");
     const [color, setColor] = useState<string>("#E64980");
+    const [attachments, setAttachments] = useState<PostAttachment[]>([]);
     const [track, setTrack] = useState<Track | null>(null);
     const [show, setShow] = useState<Show | null>(null);
 
@@ -41,7 +52,59 @@ export default function CreateCard({ user }: {
 
     const handleTextareaValueChange = (value: string) => {
         setText(value);
-    }
+    };
+
+    const handleOnGifSelect = (gif: Gif) => {
+        setAttachments((prev) => [
+            ...prev,
+            {
+                type: "video",
+                url: gif.mp4,
+            },
+        ]);
+        setTab("text");
+    };
+
+    const insertEmoji = (emoji: string) => {
+        const textarea = textareaRef.current;
+        if (!textarea) return;
+
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+
+        const newText =
+            text.slice(0, start) + emoji + text.slice(end);
+
+        setText(newText);
+
+        requestAnimationFrame(() => {
+            textarea.focus();
+            textarea.selectionStart = textarea.selectionEnd =
+                start + emoji.length;
+        });
+    };
+
+    const handleCreate = async () => {
+        setLoading(true);
+
+        const { error } = await createPost({
+            text,
+            color,
+            attachments,
+            music: track,
+            show
+        });
+
+        if (error) {
+            toast.error(error ?? "Failed to post. Please retry.");
+            setLoading(false);
+        }
+        else {
+            toast.success("Post created.");
+            router.push("/app");
+            router.refresh();
+        }
+    };
 
     if (tab === "preview")
         return (
@@ -49,6 +112,9 @@ export default function CreateCard({ user }: {
                 <PostCard
                     text={text}
                     bg={color}
+                    music={track}
+                    show={show}
+                    attachments={attachments}
                 />
 
                 <Button variant="link" onClick={() => setTab("text")}>
@@ -56,6 +122,15 @@ export default function CreateCard({ user }: {
                 </Button>
             </div>
         );
+
+    if (tab === "gif") {
+        return (
+            <GifPicker
+                onSelect={handleOnGifSelect}
+                setTab={setTab}
+            />
+        )
+    }
 
     if (tab === "music")
         return (
@@ -104,8 +179,9 @@ export default function CreateCard({ user }: {
                             </AvatarFallback>
                         </Avatar>
 
-                        <div className="w-full flex flex-col">
+                        <div className="w-full flex flex-col relative">
                             <Textarea
+                                ref={textareaRef}
                                 id="post"
                                 name="post"
                                 value={text}
@@ -114,8 +190,25 @@ export default function CreateCard({ user }: {
                                 maxLength={MAX_LENGTH}
                                 autoFocus
                                 onChange={(v) => handleTextareaValueChange(v.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Escape") {
+                                        setTab("text");
+                                    }
+                                }}
+                                disabled={loading}
                             />
+
+                            {tab === "emoji" && (
+                                <Picker
+                                    data={data}
+                                    previewPosition="none"
+                                    skinTonePosition="none"
+                                    onEmojiSelect={(emoji: any) => insertEmoji(emoji.native)}
+                                />
+                            )}
                         </div>
+
+
                     </div>
 
                     {track && (
@@ -165,26 +258,41 @@ export default function CreateCard({ user }: {
                         </div>
                     )}
 
+                    {attachments.length > 0 && (
+                        <AttachmentsCarousel
+                            attachments={attachments}
+                        />
+                    )}
+
                     <div className="flex justify-between items-center border-t">
                         <div className="w-full flex items-center justify-between border-r pt-2">
                             <div className="flex items-center gap-2">
-                                <CardButton>
+                                <CardButton disabled={loading}>
                                     <ImageIcon />
                                 </CardButton>
 
-                                <CardButton>
+                                <CardButton disabled={loading} onClick={() => setTab("gif")}>
                                     <StickerIcon />
                                 </CardButton>
 
-                                <CardButton>
+                                <CardButton disabled={loading}
+                                    onClick={() => {
+                                        if (tab === "emoji") {
+                                            setTab("text");
+                                        } else {
+                                            setTab("emoji");
+                                            textareaRef.current?.focus();
+                                        }
+                                    }}
+                                >
                                     <SmileIcon />
                                 </CardButton>
 
-                                <CardButton onClick={() => setTab("music")}>
+                                <CardButton disabled={loading} onClick={() => setTab("music")}>
                                     <MusicIcon />
                                 </CardButton>
 
-                                <CardButton onClick={() => setTab("show")}>
+                                <CardButton disabled={loading} onClick={() => setTab("show")}>
                                     <FilmIcon />
                                 </CardButton>
 
@@ -198,12 +306,13 @@ export default function CreateCard({ user }: {
                                 size={40}
                                 strokeWidth={3}
                                 value={textareaProgress}
+                                progressClassName={textareaProgress >= 100 ? "stroke-red-400" : ""}
                             />
                         </div>
 
                         <div className="flex items-center pl-2 pt-2">
-                            <Button size="sm" className="rounded-full">
-                                Post
+                            <Button onClick={handleCreate} size="sm" className="rounded-full">
+                                {loading ? <Spinner /> : "Post"}
                             </Button>
                         </div>
                     </div>
