@@ -6,6 +6,7 @@ import { Card, CardContent } from "../ui/card";
 import { SearchIcon, StickerIcon } from "lucide-react";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "../ui/input-group";
 import { Button } from "../ui/button";
+import { CreateTabs } from "@/app/(client)/(app)/create/create-card";
 
 export type Gif = {
     id: string;
@@ -16,7 +17,7 @@ export type Gif = {
     height: string;
 };
 
-export default function GifPicker({ onSelect, setTab, }: { onSelect: (gif: Gif) => void; setTab: (tab: "text" | "preview" | "music" | "gif" | "emoji") => void }) {
+export default function GifPicker({ onSelect, setTab, }: { onSelect: (gif: Gif) => void; setTab: (tab: CreateTabs) => void }) {
     const [query, setQuery] = useState("");
     const debouncedQuery = useDebounce(query, 400);
 

@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
 import Image from "next/image";
 import { Button } from "../ui/button";
+import { CreateTabs } from "@/app/(client)/(app)/create/create-card";
 
 export type Show = {
     tmdbId: number,
@@ -25,7 +26,7 @@ export const formatReleaseDate = (date: string) => {
 }
 
 
-export default function ShowSelect({ selectedShow, setSelectedShow, setTab }: { selectedShow: Show | null, setSelectedShow: (show: Show | null) => void, setTab: (tab: "text" | "preview" | "music" | "gif" | "emoji") => void }) {
+export default function ShowSelect({ selectedShow, setSelectedShow, setTab }: { selectedShow: Show | null, setSelectedShow: (show: Show | null) => void, setTab: (tab: CreateTabs) => void }) {
     const [query, setQuery] = useState("");
     const debouncedQuery = useDebounce(query, 400);
 

@@ -51,7 +51,6 @@ export default function Calendar() {
     useEffect(() => {
         (async () => {
             const retrievedPosts = await getPosts();
-            console.log(retrievedPosts);
             setPosts(retrievedPosts);
         })();
     }, []);
@@ -61,8 +60,6 @@ export default function Calendar() {
             <div className={cn("w-full h-full grid", generatedGrid)}>
                 {days.map((d, i) => {
                     const dayKey = toDayKey(d.date);
-                    console.log(typeof d.date, d.date);
-
                     const dayPosts = postsByDay.get(dayKey) ?? [];
 
                     return (

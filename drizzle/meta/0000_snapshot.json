@@ -1,5 +1,5 @@
 {
-  "id": "f4d71879-e4ca-4032-9cf0-348c3e492330",
+  "id": "ae433ecf-d7a2-427e-97f2-8f1dec95df5d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -159,8 +159,8 @@
           "name": "show",
           "type": "jsonb",
           "primaryKey": false,
-          "notNull": true,
-          "default": "'[]'::jsonb"
+          "notNull": false,
+          "default": "'null'::jsonb"
         },
         "music": {
           "name": "music",

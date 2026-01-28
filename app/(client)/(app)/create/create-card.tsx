@@ -21,8 +21,11 @@ import Picker from "@emoji-mart/react";
 import { createPost } from "@/lib/post";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
+import MediaInput, { MediaFile } from "@/components/ui/media-input";
 
 const MAX_LENGTH = 250;
+
+export type CreateTabs = "text" | "preview" | "media" | "music" | "show" | "gif" | "emoji";
 
 export default function CreateCard({ user }: {
     user: {
@@ -39,12 +42,14 @@ export default function CreateCard({ user }: {
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
     const [loading, setLoading] = useState<boolean>(false);
-    const [tab, setTab] = useState<"text" | "preview" | "music" | "show" | "gif" | "emoji">("text");
+    const [tab, setTab] = useState<CreateTabs>("text");
     const [text, setText] = useState<string>("");
     const [color, setColor] = useState<string>("#E64980");
     const [attachments, setAttachments] = useState<PostAttachment[]>([]);
     const [track, setTrack] = useState<Track | null>(null);
     const [show, setShow] = useState<Show | null>(null);
+
+    const [media, setMedia] = useState<MediaFile[]>([]);
 
     const textareaProgress = useMemo(() => {
         return Math.min(Math.floor((text.length / MAX_LENGTH) * 100), 100);
@@ -122,6 +127,20 @@ export default function CreateCard({ user }: {
                 </Button>
             </div>
         );
+
+    if (tab === "media") {
+        return (
+            <Card className="w-full sm:max-w-lg">
+                <CardContent>
+                    <MediaInput
+                        value={media}
+                        onChange={(files) => setMedia(files)}
+                        maxFiles={(5 - attachments.length)}
+                    />
+                </CardContent>
+            </Card>
+        )
+    }
 
     if (tab === "gif") {
         return (

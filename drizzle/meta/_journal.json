@@ -5,15 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1769419692591,
-      "tag": "0000_wealthy_arclight",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1769446712985,
-      "tag": "0001_married_wolf_cub",
+      "when": 1769604947488,
+      "tag": "0000_smart_warbound",
       "breakpoints": true
     }
   ]

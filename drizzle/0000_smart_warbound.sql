@@ -19,7 +19,7 @@ CREATE TABLE "post" (
 	"user_id" text NOT NULL,
 	"text" text NOT NULL,
 	"attachments" jsonb DEFAULT '[]'::jsonb NOT NULL,
-	"show" jsonb DEFAULT '[]'::jsonb NOT NULL,
+	"show" jsonb DEFAULT 'null'::jsonb,
 	"music" jsonb DEFAULT 'null'::jsonb,
 	"color" text,
 	"is_archived" boolean DEFAULT false NOT NULL,

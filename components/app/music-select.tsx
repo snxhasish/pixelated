@@ -9,6 +9,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import Image from "next/image";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
+import { CreateTabs } from "@/app/(client)/(app)/create/create-card";
 
 export type Track = {
     id: string,
@@ -20,7 +21,7 @@ export type Track = {
     spotify_url: string
 };
 
-export default function MusicSelect({ selectedTrack, setSelectedTrack, setTab }: { selectedTrack: Track | null, setSelectedTrack: (track: Track | null) => void, setTab: (tab: "text" | "preview" | "music" | "gif" | "emoji") => void }) {
+export default function MusicSelect({ selectedTrack, setSelectedTrack, setTab }: { selectedTrack: Track | null, setSelectedTrack: (track: Track | null) => void, setTab: (tab: CreateTabs) => void }) {
     const [query, setQuery] = useState("");
     const debouncedQuery = useDebounce(query, 400);
 
