@@ -51,6 +51,7 @@ export default function Calendar() {
     useEffect(() => {
         (async () => {
             const retrievedPosts = await getPosts();
+            console.log(retrievedPosts);
             setPosts(retrievedPosts);
         })();
     }, []);
@@ -75,7 +76,7 @@ export default function Calendar() {
                                             key={post.id}
                                             bg={post.color ?? "#fff"}
                                             text={post.text ?? ""}
-                                            attachments={[]}
+                                            attachments={post.attachments}
                                             music={post.music}
                                             show={post.show}
                                         />

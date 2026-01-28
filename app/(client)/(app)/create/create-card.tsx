@@ -14,17 +14,21 @@ import MusicSelect, { Track } from "@/components/app/music-select";
 import Image from "next/image";
 import ShowSelect, { formatReleaseDate, Show } from "@/components/app/show-select";
 import GifPicker, { Gif } from "@/components/app/gif-picker";
-import { PostAttachment } from "@/types/post";
-import { AttachmentsCarousel } from "@/components/app/attachment-carousel";
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
 import { createPost } from "@/lib/post";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
-import MediaInput, { MediaFile } from "@/components/ui/media-input";
+import MediaInput, { MediaFile, MediaList } from "@/components/ui/media-input";
+import { useMediaUpload } from "@/hooks/use-media-upload";
+import AnimatedProgress from "@/components/ui/animated-progress";
+import { cn } from "@/lib/utils";
 
 const MAX_LENGTH = 250;
-
+export type PostAttachment = {
+    type: "image" | "video";
+    url: string;
+}
 export type CreateTabs = "text" | "preview" | "media" | "music" | "show" | "gif" | "emoji";
 
 export default function CreateCard({ user }: {
@@ -40,15 +44,14 @@ export default function CreateCard({ user }: {
 }) {
     const router = useRouter();
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+    const { uploadMedia, isUploading, progress: mediaUploadProgress } = useMediaUpload();
 
     const [loading, setLoading] = useState<boolean>(false);
     const [tab, setTab] = useState<CreateTabs>("text");
     const [text, setText] = useState<string>("");
     const [color, setColor] = useState<string>("#E64980");
-    const [attachments, setAttachments] = useState<PostAttachment[]>([]);
     const [track, setTrack] = useState<Track | null>(null);
     const [show, setShow] = useState<Show | null>(null);
-
     const [media, setMedia] = useState<MediaFile[]>([]);
 
     const textareaProgress = useMemo(() => {
@@ -60,7 +63,7 @@ export default function CreateCard({ user }: {
     };
 
     const handleOnGifSelect = (gif: Gif) => {
-        setAttachments((prev) => [
+        setMedia((prev) => [
             ...prev,
             {
                 type: "video",
@@ -92,6 +95,10 @@ export default function CreateCard({ user }: {
     const handleCreate = async () => {
         setLoading(true);
 
+        let attachments: PostAttachment[] = [];
+
+        if (media.length > 0) attachments = await uploadMedia(media);
+
         const { error } = await createPost({
             text,
             color,
@@ -119,7 +126,7 @@ export default function CreateCard({ user }: {
                     bg={color}
                     music={track}
                     show={show}
-                    attachments={attachments}
+                    attachments={media}
                 />
 
                 <Button variant="link" onClick={() => setTab("text")}>
@@ -131,11 +138,23 @@ export default function CreateCard({ user }: {
     if (tab === "media") {
         return (
             <Card className="w-full sm:max-w-lg">
-                <CardContent>
+                <CardContent className="flex flex-col gap-4">
+                    <div className="w-full flex justify-between items-center gap-4">
+                        <h2 className="font-semibold">
+                            Upload media
+                        </h2>
+
+                        <Button variant="link" onClick={() => setTab("text")}>
+                            Done
+                        </Button>
+                    </div>
+
                     <MediaInput
                         value={media}
-                        onChange={(files) => setMedia(files)}
-                        maxFiles={(5 - attachments.length)}
+                        maxFiles={5}
+                        onChange={(files) => {
+                            setMedia(files);
+                        }}
                     />
                 </CardContent>
             </Card>
@@ -170,7 +189,7 @@ export default function CreateCard({ user }: {
         );
 
     return (
-        <Card className="w-full sm:max-w-lg p-0">
+        <Card className={cn("w-full sm:max-w-lg p-0 relative", media.length > 0 ? "border-b-0 rounded-b-none" : "")}>
             <CardContent className="p-2">
                 <div className="flex flex-col gap-4">
                     <div className="flex justify-between items-center gap-4">
@@ -226,8 +245,6 @@ export default function CreateCard({ user }: {
                                 />
                             )}
                         </div>
-
-
                     </div>
 
                     {track && (
@@ -277,16 +294,19 @@ export default function CreateCard({ user }: {
                         </div>
                     )}
 
-                    {attachments.length > 0 && (
-                        <AttachmentsCarousel
-                            attachments={attachments}
+                    {media.length > 0 && (
+                        <MediaList
+                            media={media}
+                            onChange={(files) => {
+                                setMedia(files);
+                            }}
                         />
                     )}
 
                     <div className="flex justify-between items-center border-t">
                         <div className="w-full flex items-center justify-between border-r pt-2">
                             <div className="flex items-center gap-2">
-                                <CardButton disabled={loading}>
+                                <CardButton disabled={loading} onClick={() => setTab("media")}>
                                     <ImageIcon />
                                 </CardButton>
 
@@ -330,13 +350,21 @@ export default function CreateCard({ user }: {
                         </div>
 
                         <div className="flex items-center pl-2 pt-2">
-                            <Button onClick={handleCreate} size="sm" className="rounded-full">
+                            <Button disabled={loading} onClick={handleCreate} size="sm" className="rounded-full">
                                 {loading ? <Spinner /> : "Post"}
                             </Button>
                         </div>
                     </div>
                 </div>
+
             </CardContent>
+
+            {media.length > 0 && (
+                <AnimatedProgress
+                    value={(mediaUploadProgress.current / mediaUploadProgress.total) * 100}
+                    className="absolute bottom-0 left-0 right-0 rounded-lg h-1"
+                />
+            )}
         </Card>
     )
 }

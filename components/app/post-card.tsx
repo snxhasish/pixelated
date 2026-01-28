@@ -1,7 +1,10 @@
 import { getReadableTextColor } from "@/lib/color"
 import { MusicPreview, Track } from "./music-select";
 import { Show, ShowPreview } from "./show-select";
-import { PostAttachment } from "@/types/post";
+import { PostAttachment } from "@/app/(client)/(app)/create/create-card";
+import { MediaFile } from "../ui/media-input";
+import MediaCarousel from "../ui/media-carousel";
+import Image from "next/image";
 
 export default function PostCard(
     {
@@ -15,7 +18,7 @@ export default function PostCard(
         text: string,
         music: Track | null,
         show: Show | null,
-        attachments: PostAttachment[]
+        attachments: (MediaFile | PostAttachment)[]
     }
 ) {
     const textColor = getReadableTextColor(bg);
@@ -45,6 +48,18 @@ export default function PostCard(
                     show={show}
                 />
             )}
+
+            {attachments.length > 0 && (
+                <MediaCarousel
+                    media={attachments}
+                />
+            )}
         </div>
+    )
+}
+
+export const PostCardMedia = ({ type, url }: PostAttachment) => {
+    return (
+        <></>
     )
 }

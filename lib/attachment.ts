@@ -1,4 +1,4 @@
-import { PostAttachment } from "@/types/post";
+import { MediaFile } from "@/components/ui/media-input";
 
 const IMAGE_EXTENSIONS = ["jpg", "jpeg", "png", "webp", "gif"];
 const VIDEO_EXTENSIONS = ["mp4", "webm", "mov", "m4v"];
@@ -41,7 +41,7 @@ export async function validateMediaUrl(
 
 export function validateAttachments(
     attachments: unknown
-): attachments is PostAttachment[] {
+): attachments is Omit<MediaFile, "file">[] {
     if (!Array.isArray(attachments)) return false;
 
     return attachments.every((att) => {

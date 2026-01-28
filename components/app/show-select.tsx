@@ -147,6 +147,7 @@ export default function ShowSelect({ selectedShow, setSelectedShow, setTab }: { 
                                 <ShowPreview
                                     key={show.tmdbId}
                                     show={show}
+                                    onClick={() => setSelectedShow(show)}
                                 />
                             ))}
                         </ul>

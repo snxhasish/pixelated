@@ -7,16 +7,12 @@ import {
     CarouselContent,
     CarouselItem,
 } from "@/components/ui/carousel";
-
-export type PostAttachment = {
-    type: "image" | "video";
-    url: string;
-};
+import { MediaFile } from "@/components/ui/media-input";
 
 export function AttachmentsCarousel({
     attachments,
 }: {
-    attachments: PostAttachment[];
+    attachments: MediaFile[];
 }) {
     if (!attachments.length) return null;
 

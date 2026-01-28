@@ -1,16 +1,12 @@
 import { Track } from "@/components/app/music-select";
 import { Show } from "@/components/app/show-select";
-
-export type PostAttachment = {
-    type: "image" | "video";
-    url: string;
-};
+import { MediaFile } from "@/components/ui/media-input";
 
 export type Post = {
     date: string;
     id: string;
     text?: string;
-    attachments: PostAttachment[];
+    attachments: MediaFile[];
     show: Show | null;
     music: Track | null;
     color?: string;

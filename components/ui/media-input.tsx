@@ -1,14 +1,13 @@
 "use client";
 
-import { ImageIcon, VideoIcon, XCircleIcon } from "lucide-react";
+import { ImagePlusIcon, XCircleIcon } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
 import Dropzone from "react-dropzone";
 import { cn } from "@/lib/utils";
 
 interface MediaFile {
-  file: File;
-  preview: string;
+  file?: File;
+  url: string;
   type: "image" | "video";
 }
 
@@ -17,8 +16,8 @@ interface MediaPreviewProps {
   onRemove: () => void;
 }
 
-const MediaPreview = ({ media, onRemove }: MediaPreviewProps) => (
-  <div className="relative aspect-square">
+export const MediaPreview = ({ media, onRemove }: MediaPreviewProps) => (
+  <div className="relative col-span-1 aspect-square">
     <button
       type="button"
       className="absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 z-10"
@@ -31,13 +30,13 @@ const MediaPreview = ({ media, onRemove }: MediaPreviewProps) => (
         alt="Preview"
         className="h-full w-full rounded-md border border-border object-cover"
         height={500}
-        src={media.preview}
+        src={media.url}
         width={500}
       />
     ) : (
       <video
         className="h-full w-full rounded-md border border-border object-cover"
-        src={media.preview}
+        src={media.url}
       >
         <track kind="captions" />
       </video>
@@ -65,45 +64,48 @@ export default function MediaInput({
   },
   className,
 }: MediaInputProps) {
-  const [mediaFiles, setMediaFiles] = useState<MediaFile[]>(value);
-
   const handleDrop = (acceptedFiles: File[]) => {
     const newMediaFiles = acceptedFiles.map((file) => ({
       file,
-      preview: URL.createObjectURL(file),
+      url: URL.createObjectURL(file),
       type: file.type.startsWith("image/") ? ("image" as const) : ("video" as const),
     }));
 
-    const updatedFiles = [...mediaFiles, ...newMediaFiles].slice(0, maxFiles);
-    setMediaFiles(updatedFiles);
+    const updatedFiles = [...value, ...newMediaFiles].slice(0, maxFiles);
     onChange?.(updatedFiles);
   };
 
   const handleRemove = (index: number) => {
-    const newMediaFiles = mediaFiles.filter((_, i) => i !== index);
+    const mediaToRemove = value[index];
 
-    // Clean up object URL to prevent memory leaks
-    URL.revokeObjectURL(mediaFiles[index].preview);
+    // Revoke URL if it's a blob URL
+    if (mediaToRemove.url.startsWith('blob:')) {
+      URL.revokeObjectURL(mediaToRemove.url);
+    }
 
-    setMediaFiles(newMediaFiles);
+    const newMediaFiles = value.filter((_, i) => i !== index);
     onChange?.(newMediaFiles);
   };
 
   return (
     <div className={cn("w-full", className)}>
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-        {mediaFiles.map((media, index) => (
-          <MediaPreview
-            key={index}
-            media={media}
-            onRemove={() => handleRemove(index)}
-          />
-        ))}
+      <div className="w-full flex flex-col gap-4">
+        {value.length > 0 && (
+          <div className="w-full grid grid-cols-5 gap-2">
+            {value.map((m, i) => (
+              <MediaPreview
+                key={`${m.url}-${i}`}
+                media={m}
+                onRemove={() => handleRemove(i)}
+              />
+            ))}
+          </div>
+        )}
 
-        {mediaFiles.length < maxFiles && (
+        {value.length < maxFiles && (
           <Dropzone
             accept={accept}
-            maxFiles={maxFiles - mediaFiles.length}
+            maxFiles={maxFiles - value.length}
             onDrop={handleDrop}
           >
             {({
@@ -116,7 +118,7 @@ export default function MediaInput({
               <div
                 {...getRootProps()}
                 className={cn(
-                  "flex aspect-square cursor-pointer flex-col items-center justify-center gap-2 rounded-md border border-dashed transition-colors focus:border-primary focus:outline-hidden",
+                  "w-full p-5 flex cursor-pointer  items-center justify-center gap-2 rounded-lg border border-dashed transition-colors focus:border-primary focus:outline-hidden",
                   {
                     "border-primary bg-secondary": isDragActive && isDragAccept,
                     "border-destructive bg-destructive/20":
@@ -126,11 +128,10 @@ export default function MediaInput({
               >
                 <input {...getInputProps()} />
                 <div className="flex gap-2">
-                  <ImageIcon className="h-8 w-8 text-muted-foreground" strokeWidth={1.25} />
-                  <VideoIcon className="h-8 w-8 text-muted-foreground" strokeWidth={1.25} />
+                  <ImagePlusIcon className="h-8 w-8 text-muted-foreground" strokeWidth={1} />
                 </div>
-                <p className="text-xs text-muted-foreground text-center px-2">
-                  Drop files or click
+                <p className="text-base font-medium text-muted-foreground text-center px-2">
+                  Upload or drop media files
                 </p>
               </div>
             )}
@@ -139,6 +140,32 @@ export default function MediaInput({
       </div>
     </div>
   );
+}
+
+export function MediaList({ media, onChange }: { media: MediaFile[], onChange: (f: MediaFile[]) => void }) {
+  const handleRemove = (index: number) => {
+    const mediaToRemove = media[index];
+
+    // Revoke URL if it's a blob URL
+    if (mediaToRemove.url.startsWith('blob:')) {
+      URL.revokeObjectURL(mediaToRemove.url);
+    }
+
+    const newMediaFiles = media.filter((_, i) => i !== index);
+    onChange(newMediaFiles);
+  };
+
+  return (
+    <div className="w-full grid grid-cols-5 gap-2">
+      {media.map((m, i) => (
+        <MediaPreview
+          key={`${m.url}-${i}`}
+          media={m}
+          onRemove={() => handleRemove(i)}
+        />
+      ))}
+    </div>
+  )
 }
 
 export type { MediaFile };
