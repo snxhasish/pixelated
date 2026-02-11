@@ -70,7 +70,7 @@ export default function MediaCarousel({
                                     <img
                                         src={item.url}
                                         alt={`Media ${index + 1}`}
-                                        className="h-full w-full object-contain"
+                                        className="h-full w-full object-contain rounded-lg"
                                     />
                                 </div>
                             ) : (

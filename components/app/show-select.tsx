@@ -8,6 +8,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import Image from "next/image";
 import { Button } from "../ui/button";
 import { CreateTabs } from "@/app/(client)/(app)/create/create-card";
+import { cn } from "@/lib/utils";
 
 export type Show = {
     tmdbId: number,
@@ -158,9 +159,12 @@ export default function ShowSelect({ selectedShow, setSelectedShow, setTab }: { 
     )
 }
 
-export function ShowPreview({ show, className, ...props }: { show: Show, className?: string, [props: string]: any }) {
+export function ShowPreview({ show, onHover = true, className, ...props }: { show: Show, onHover?: boolean, className?: string, [props: string]: any }) {
     return (
-        <li className="w-full flex items-center gap-3 p-2 rounded-md hover:bg-muted cursor-pointer" {...props}>
+        <li
+            className={cn("w-full flex items-center gap-3 p-2 rounded-md cursor-pointer", className, onHover ? "hover:bg-muted" : "")}
+            {...props}
+        >
             {show.poster && (
                 <Image
                     src={show.poster}
@@ -176,7 +180,7 @@ export function ShowPreview({ show, className, ...props }: { show: Show, classNa
                 <span className="text-sm font-medium">
                     {show.title}
                 </span>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-xs">
                     {formatReleaseDate(show.releaseDate)}
                 </span>
             </div>

@@ -4,12 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { FlickeringGrid } from "@/components/ui/flickering-grid";
-import { Input } from "@/components/ui/input";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
-import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { authClient } from "@/lib/auth-client";
-import { AtSignIcon, CheckIcon, SendIcon } from "lucide-react";
+import { AtSignIcon, SendIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -18,6 +16,7 @@ export default function Login() {
     const { theme } = useTheme();
     const [email, setEmail] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
+    const [completed, setCompleted] = useState<boolean>(false);
 
     const handleSendVerification = async () => {
         setLoading(true);
@@ -33,6 +32,7 @@ export default function Login() {
             toast.error(error.message);
             setLoading(false);
         }
+        else setCompleted(true);
     }
 
     return (
@@ -43,56 +43,70 @@ export default function Login() {
                         <FlickeringGrid
                             className="inset-0 z-0"
                             squareSize={5}
-                            color={theme === "light" ? "#000000" : "#ffffff"}
+                            color={theme === "dark" ? "#ffffff" : "#000000"}
                             maxOpacity={0.75}
                             flickerChance={0.2}
                         />
                     </div>
 
                     <CardTitle className="text-3xl tracking-tighter">
-                        Login to pixelated
+                        {
+                            completed ?
+                                "Email Sent" : "Login to pixelated"
+                        }
                     </CardTitle>
                     <CardDescription className="font-medium">
-                        We will send a verification link to your email address.
+                        {
+                            completed ?
+                                <span>
+                                    A verification link has been sent to your email address. <br />
+                                    You can close this tab now.
+                                </span> :
+                                "We will send a verification link to your email address."
+                        }
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="flex flex-col gap-4">
-                        <Field>
-                            <FieldLabel htmlFor="email">Email</FieldLabel>
-                            <InputGroup>
-                                <InputGroupInput
-                                    id="email"
-                                    type="email"
-                                    name="email"
-                                    placeholder="email@pxlt.me"
-                                    onInput={(e) => setEmail(e.currentTarget.value)}
-                                />
-                                <InputGroupAddon align="inline-start">
-                                    <AtSignIcon className="text-muted-foreground" />
-                                </InputGroupAddon>
-                            </InputGroup>
-                        </Field>
+                    {
+                        completed ?
+                            null
+                            :
+                            <div className="flex flex-col gap-4">
+                                <Field>
+                                    <FieldLabel htmlFor="email">Email</FieldLabel>
+                                    <InputGroup>
+                                        <InputGroupInput
+                                            id="email"
+                                            type="email"
+                                            name="email"
+                                            placeholder="email@pxlt.me"
+                                            onInput={(e) => setEmail(e.currentTarget.value)}
+                                        />
+                                        <InputGroupAddon align="inline-start">
+                                            <AtSignIcon className="text-muted-foreground" />
+                                        </InputGroupAddon>
+                                    </InputGroup>
+                                </Field>
 
-                        <Button
-                            disabled={loading}
-                            className="w-full"
-                            onClick={handleSendVerification}
-                        >
-                            {
-                                loading ?
-                                    <>
-                                        <CheckIcon />
-                                        <span>Sent</span>
-                                    </> :
-                                    <>
-                                        <SendIcon />
-                                        <span>Send Verification Link</span>
-                                    </>
-                            }
-                        </Button>
-                    </div>
-
+                                <Button
+                                    disabled={loading}
+                                    className="w-full"
+                                    onClick={handleSendVerification}
+                                >
+                                    {
+                                        loading ?
+                                            <>
+                                                <Spinner />
+                                                <span>Sending email</span>
+                                            </> :
+                                            <>
+                                                <SendIcon />
+                                                <span>Send Verification Link</span>
+                                            </>
+                                    }
+                                </Button>
+                            </div>
+                    }
                 </CardContent>
             </Card>
         </main>

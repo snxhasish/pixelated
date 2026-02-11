@@ -29,7 +29,7 @@ export default function PostCard(
             style={{ backgroundColor: bg, color: textColor }}
         >
             {text && (
-                <p className="text-base font-medium">
+                <p className="text-sm font-medium">
                     {text}
                 </p>
             )}
@@ -46,6 +46,7 @@ export default function PostCard(
                 <ShowPreview
                     className="p-0"
                     show={show}
+                    onHover={false}
                 />
             )}
 

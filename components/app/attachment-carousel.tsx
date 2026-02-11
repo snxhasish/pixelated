@@ -49,13 +49,6 @@ export function AttachmentsCarousel({
                     </CarouselItem>
                 ))}
             </CarouselContent>
-
-            {/* {attachments.length > 5 && (
-                <>
-                    <CarouselPrevious className="" />
-                    <CarouselNext className="" />
-                </>
-            )} */}
         </Carousel>
     );
 }
