@@ -8,7 +8,7 @@ export default function Navbar() {
                 pxlt.
             </h1>
 
-            <div className="flex items-center gap-4">
+            <div className="hidden sm:flex items-center gap-4">
                 <NavLink href="/subscribe">Subscribe</NavLink>
                 <NavLink href="/about">About</NavLink>
                 <NavLink href="/community">Community</NavLink>
